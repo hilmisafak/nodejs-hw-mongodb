@@ -1,9 +1,7 @@
 import express from "express";
 import pino from "pino-http";
 import cors from "cors";
-import contactsRouter from "./routers/contacts.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
-import { notFoundHandler } from "./middlewares/notFoundHandler.js";
+import { contactsRouter } from "./routers/contacts.js";
 
 export const setupServer = () => {
   const app = express();
@@ -12,8 +10,12 @@ export const setupServer = () => {
   app.use(cors());
   app.use(pino({ transport: { target: "pino-pretty" } }));
   app.use("/contacts", contactsRouter);
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+
+  app.use((req, res, _next) => {
+    res.status(404).json({
+      message: "Not found",
+    });
+  });
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
