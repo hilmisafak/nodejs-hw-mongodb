@@ -2,11 +2,50 @@ import createError from "http-errors";
 import * as contactsServices from "../services/contacts.js";
 
 export const getContactsController = async (_req, res) => {
-  const contacts = await contactsServices.getAllContacts();
+  const {
+    page = 1,
+    perPage = 10,
+    sortBy = "name",
+    sortOrder = "asc",
+    type,
+    isFavorite,
+  } = _req.query;
+
+  const parsedPage = parseInt(page, 10);
+  const parsedPerPage = parseInt(perPage, 10);
+  const filter = {};
+
+  if (type) {
+    filter.contactType = type;
+  }
+  if (isFavorite !== undefined) {
+    filter.isFavorite = isFavorite === "true";
+  }
+
+  const { contacts, totalItems } = await contactsServices.getAllContacts({
+    page: parsedPage,
+    perPage: parsedPerPage,
+    sortBy,
+    sortOrder,
+    filter,
+  });
+
+  const totalPages = Math.ceil(totalItems / parsedPerPage);
+  const hasPreviousPage = parsedPage > 1;
+  const hasNextPage = parsedPage < totalPages;
+
   res.status(200).json({
     status: 200,
     message: "Successfully found contacts!",
-    data: contacts,
+    data: {
+      data: contacts,
+      page: parsedPage,
+      perPage: parsedPerPage,
+      totalItems,
+      totalPages,
+      hasPreviousPage,
+      hasNextPage,
+    },
   });
 };
 
