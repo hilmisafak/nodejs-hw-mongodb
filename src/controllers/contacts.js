@@ -8,7 +8,7 @@ export const getContactsController = async (_req, res) => {
     sortBy = "name",
     sortOrder = "asc",
     type,
-    isFavorite,
+    isFavourite,
   } = _req.query;
 
   const parsedPage = parseInt(page, 10);
@@ -18,8 +18,8 @@ export const getContactsController = async (_req, res) => {
   if (type) {
     filter.contactType = type;
   }
-  if (isFavorite !== undefined) {
-    filter.isFavorite = isFavorite === "true";
+  if (isFavourite !== undefined) {
+    filter.isFavourite = isFavourite === "true";
   }
 
   const { contacts, totalItems } = await contactsServices.getAllContacts({

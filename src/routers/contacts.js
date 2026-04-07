@@ -8,14 +8,14 @@ import { createContactSchema, updateContactSchema } from "../schemas/contactSche
 const router = Router();
 
 router.get("/", ctrlWrapper(contactsControllers.getContactsController));
-router.get("/:contactId", isValidId, contactsControllers.getContactByIdController);
-router.post("/", validateBody(createContactSchema), contactsControllers.createContactController);
+router.get("/:contactId", isValidId, ctrlWrapper(contactsControllers.getContactByIdController));
+router.post("/", validateBody(createContactSchema), ctrlWrapper(contactsControllers.createContactController));
 router.patch(
   "/:contactId",
   isValidId,
   validateBody(updateContactSchema),
-  contactsControllers.patchContactController,
+  ctrlWrapper(contactsControllers.patchContactController),
 );
-router.delete("/:contactId", isValidId, contactsControllers.deleteContactController);
+router.delete("/:contactId", isValidId, ctrlWrapper(contactsControllers.deleteContactController));
 
 export default router;
