@@ -1,5 +1,6 @@
 import createError from "http-errors";
 import * as contactsServices from "../services/contacts.js";
+import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 
 export const getContactsController = async (_req, res) => {
   const {
@@ -69,7 +70,11 @@ export const getContactByIdController = async (req, res) => {
 
 export const createContactController = async (req, res) => {
   const userId = req.user._id;
-  const contact = await contactsServices.createContact({ ...req.body, userId });
+  let photoUrl = null;
+  if (req.file) {
+    photoUrl = await saveFileToCloudinary(req.file);
+  }
+  const contact = await contactsServices.createContact({ ...req.body, userId, photo: photoUrl });
   res.status(201).json({
     status: 201,
     message: "Successfully created a contact!",
@@ -80,7 +85,12 @@ export const createContactController = async (req, res) => {
 export const patchContactController = async (req, res) => {
   const { contactId } = req.params;
   const userId = req.user._id;
-  const contact = await contactsServices.patchContact(contactId, userId, req.body);
+  let photoUrl;
+  if (req.file) {
+    photoUrl = await saveFileToCloudinary(req.file);
+  }
+  const payload = photoUrl ? { ...req.body, photo: photoUrl } : req.body;
+  const contact = await contactsServices.patchContact(contactId, userId, payload);
 
   if (!contact) {
     throw createError(404, "Contact not found");
