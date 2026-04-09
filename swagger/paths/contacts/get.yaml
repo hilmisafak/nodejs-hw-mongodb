@@ -1,0 +1,52 @@
+tags:
+  - Contacts
+summary: Tüm kişileri listeler
+operationId: getAllContacts
+description: Oturum açmış kullanıcıya ait kişileri sayfalama, sıralama ve filtreleme ile döndürür.
+security:
+  - bearerAuth: []
+parameters:
+  - in: query
+    name: page
+    schema:
+      type: integer
+      minimum: 1
+      default: 1
+    description: Sayfa numarası
+  - in: query
+    name: perPage
+    schema:
+      type: integer
+      minimum: 1
+      default: 10
+    description: Sayfa başına kayıt sayısı
+  - in: query
+    name: sortBy
+    schema:
+      type: string
+      default: name
+    description: Sıralama alanı (ör. name)
+  - in: query
+    name: sortOrder
+    schema:
+      type: string
+      enum: [asc, desc]
+      default: asc
+    description: Artan veya azalan sıra
+  - in: query
+    name: type
+    schema:
+      type: string
+      enum: [work, home, personal]
+    description: Kişi türüne göre filtre (contactType)
+  - in: query
+    name: isFavourite
+    schema:
+      type: string
+      enum: ["true", "false"]
+    description: Favori olup olmadığına göre filtre (string "true" / "false")
+responses:
+  "200":
+    description: Başarılı yanıt.
+  "401":
+    description: Yetkisiz istek (geçersiz veya eksik access token).

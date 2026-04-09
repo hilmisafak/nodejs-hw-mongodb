@@ -6,10 +6,20 @@ import contactsRouter from "./routers/contacts.js";
 import authRouter from "./routers/auth.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { notFoundHandler } from "./middlewares/notFoundHandler.js";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import swaggerUi from "swagger-ui-express";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const swaggerJsonPath = path.join(__dirname, "..", "docs", "swagger.json");
 
 export const setupServer = () => {
   const app = express();
-
+  if (fs.existsSync(swaggerJsonPath)) {
+    const swaggerDocument = JSON.parse(fs.readFileSync(swaggerJsonPath, "utf8"));
+    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  }
   app.use(express.json());
   app.use(cors({ credentials: true, origin: true }));
   app.use(cookieParser());

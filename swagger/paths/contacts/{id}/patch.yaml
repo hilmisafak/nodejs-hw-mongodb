@@ -1,0 +1,52 @@
+tags:
+  - Contacts
+summary: Kişi bilgilerini günceller
+operationId: updateContact
+description: >
+  Verilen ID'ye sahip kişiyi günceller. En az bir alan gönderilmelidir.
+  Fotoğraf göndermek için multipart/form-data kullanın; `photo` dosya alanı opsiyoneldir.
+security:
+  - bearerAuth: []
+parameters:
+  - in: path
+    name: contactId
+    required: true
+    schema:
+      type: string
+    description: Kişinin benzersiz ID'si
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        minProperties: 1
+        properties:
+          name:
+            type: string
+            minLength: 3
+            maxLength: 20
+          email:
+            type: string
+            format: email
+          phoneNumber:
+            type: string
+            minLength: 3
+            maxLength: 20
+          isFavourite:
+            type: boolean
+          contactType:
+            type: string
+            enum: [work, home, personal]
+          photo:
+            type: string
+            format: binary
+responses:
+  "200":
+    description: Kişi başarıyla güncellendi.
+  "400":
+    description: Doğrulama hatası (güncellenecek alan yok veya geçersiz veri).
+  "401":
+    description: Yetkisiz istek (geçersiz veya eksik access token).
+  "404":
+    description: Kişi bulunamadı.

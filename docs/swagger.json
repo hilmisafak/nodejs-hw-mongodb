@@ -1,0 +1,355 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "İletişim API",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "description": "Node.js kursu için hazırlanan kişi yönetimi (Contacts) API dokümantasyonu.\n"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Yerel Geliştirme Sunucusu"
+    },
+    {
+      "url": "https://nodejs-hw-mongodb-xdc9.onrender.com",
+      "description": "Canlı sunucu"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Contacts",
+      "description": "Kişi işlemleri"
+    }
+  ],
+  "paths": {
+    "/contacts": {
+      "get": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Tüm kişileri listeler",
+        "operationId": "getAllContacts",
+        "description": "Oturum açmış kullanıcıya ait kişileri sayfalama, sıralama ve filtreleme ile döndürür.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Sayfa numarası"
+          },
+          {
+            "in": "query",
+            "name": "perPage",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10
+            },
+            "description": "Sayfa başına kayıt sayısı"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "name"
+            },
+            "description": "Sıralama alanı (ör. name)"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            },
+            "description": "Artan veya azalan sıra"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "work",
+                "home",
+                "personal"
+              ]
+            },
+            "description": "Kişi türüne göre filtre (contactType)"
+          },
+          {
+            "in": "query",
+            "name": "isFavourite",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Favori olup olmadığına göre filtre (string \"true\" / \"false\")"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Başarılı yanıt."
+          },
+          "401": {
+            "description": "Yetkisiz istek (geçersiz veya eksik access token)."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Yeni kişi ekler",
+        "operationId": "createContact",
+        "description": "Yeni kişi oluşturur. İsteğin Content-Type değeri multipart/form-data olabilir; fotoğraf yüklemek için `photo` alanında dosya gönderin. Metin alanları form alanı olarak iletilir.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "phoneNumber"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20,
+                    "example": "Ahmet Yılmaz"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "ahmet@example.com"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20,
+                    "example": "05555555555"
+                  },
+                  "isFavourite": {
+                    "type": "boolean"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": [
+                      "work",
+                      "home",
+                      "personal"
+                    ]
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "İsteğe bağlı; Cloudinary URL modelde saklanır."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Kişi başarıyla oluşturuldu."
+          },
+          "400": {
+            "description": "Doğrulama hatası (eksik veya hatalı alan)."
+          },
+          "401": {
+            "description": "Yetkisiz istek (geçersiz veya eksik access token)."
+          }
+        }
+      }
+    },
+    "/contacts/{contactId}": {
+      "get": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Belirli bir kişiyi getirir",
+        "operationId": "getContactById",
+        "description": "Verilen ID'ye sahip kişiyi veritabanından bulur ve döndürür.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contactId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Kişinin benzersiz ID'si"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Başarılı yanıt, kişi bulundu."
+          },
+          "401": {
+            "description": "Yetkisiz istek (geçersiz veya eksik access token)."
+          },
+          "404": {
+            "description": "Bulunamadı yanıtı."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Kişi bilgilerini günceller",
+        "operationId": "updateContact",
+        "description": "Verilen ID'ye sahip kişiyi günceller. En az bir alan gönderilmelidir. Fotoğraf göndermek için multipart/form-data kullanın; `photo` dosya alanı opsiyoneldir.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contactId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Kişinin benzersiz ID'si"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "minProperties": 1,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20
+                  },
+                  "isFavourite": {
+                    "type": "boolean"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": [
+                      "work",
+                      "home",
+                      "personal"
+                    ]
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kişi başarıyla güncellendi."
+          },
+          "400": {
+            "description": "Doğrulama hatası (güncellenecek alan yok veya geçersiz veri)."
+          },
+          "401": {
+            "description": "Yetkisiz istek (geçersiz veya eksik access token)."
+          },
+          "404": {
+            "description": "Kişi bulunamadı."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Kişiyi siler",
+        "operationId": "deleteContact",
+        "description": "Verilen ID'ye sahip kişiyi veritabanından kalıcı olarak siler.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contactId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Kişinin benzersiz ID'si"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Kişi başarıyla silindi (gövde yok)."
+          },
+          "401": {
+            "description": "Yetkisiz istek (geçersiz veya eksik access token)."
+          },
+          "404": {
+            "description": "Kişi bulunamadı."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

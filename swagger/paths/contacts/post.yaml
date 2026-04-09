@@ -1,0 +1,49 @@
+tags:
+  - Contacts
+summary: Yeni kişi ekler
+operationId: createContact
+description: >
+  Yeni kişi oluşturur. İsteğin Content-Type değeri multipart/form-data olabilir;
+  fotoğraf yüklemek için `photo` alanında dosya gönderin. Metin alanları form alanı olarak iletilir.
+security:
+  - bearerAuth: []
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required:
+          - name
+          - phoneNumber
+        properties:
+          name:
+            type: string
+            minLength: 3
+            maxLength: 20
+            example: Ahmet Yılmaz
+          email:
+            type: string
+            format: email
+            example: ahmet@example.com
+          phoneNumber:
+            type: string
+            minLength: 3
+            maxLength: 20
+            example: "05555555555"
+          isFavourite:
+            type: boolean
+          contactType:
+            type: string
+            enum: [work, home, personal]
+          photo:
+            type: string
+            format: binary
+            description: İsteğe bağlı; Cloudinary URL modelde saklanır.
+responses:
+  "201":
+    description: Kişi başarıyla oluşturuldu.
+  "400":
+    description: Doğrulama hatası (eksik veya hatalı alan).
+  "401":
+    description: Yetkisiz istek (geçersiz veya eksik access token).
